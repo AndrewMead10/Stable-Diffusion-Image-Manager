@@ -106,7 +106,6 @@ for mention in mentions_list:
             download_discord_file(
                 image.get_attribute('href'), prompt, seeds[i])
     else:
-        print(message)
         seeds = [message[match.start() + 3: match.end()]
                  for match in re.finditer("-S [0-9]*", message)]
         seeds = seeds[1:]
@@ -114,8 +113,6 @@ for mention in mentions_list:
             n = int(message[message.find('-n') + 3])
         except:
             n = 1
-        print(seeds)
-        print(n)
         assert len(seeds) == n
 
         download_discord_file(images[0].get_attribute('href'), prompt, 'grid')
