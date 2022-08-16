@@ -14,8 +14,6 @@ parser.add_argument('-E', '--email', type=str, required=True,
                     help='Email Associated With Your Discord Account')
 parser.add_argument('-P', '--password', type=str,
                     required=True, help='Your Discord Password')
-# to be added later
-# parser.add_argument('-F', '--folder', type=str, const='images', help="Folder that the images will be saved to")
 args = parser.parse_args()
 
 
@@ -37,6 +35,7 @@ password_element.submit()
 
 print('Successfully logged in')
 
+# wait for discord profile to load
 time.sleep(10)
 
 actions = ActionChains(browser)
@@ -49,8 +48,10 @@ inbox = buttons[1]
 actions.move_to_element(inbox
                         ).click().perform()
 
+# wait for inbox to load
 time.sleep(2)
 
+# load all messages in inbox
 while True:
     try:
         load_more = browser.find_element_by_class_name('lookFilled-yCfaCM')
@@ -59,30 +60,37 @@ while True:
     except:
         break
 
-
+# get all notification messages
 mentions_list = browser.find_elements_by_class_name('container-iA3Qrz')
+
 previous = open('previous.txt', 'r').read()
 is_first = True
+
 for mention in mentions_list:
     message = mention.find_element_by_class_name(
         'messageContent-2t3eCI')
     message = message.text
 
+    # get only messages from the bot
     if message.find('Dreamt') != 0 or message.find('Dreamt') == -1:
         continue
+    # check to see if we have parsed this message before, if so, we can stop
     if message == previous:
         break
+    # save the first inbox message to compare against later
     if is_first:
         f = open('previous.txt', 'w')
         f.write(message)
         f.close()
         is_first = False
 
+    # extract the prompt and remove any characters that are not allowed in folder names
     first_quote = message.index('"')
     second_quote = message.index('"', first_quote + 1)
     prompt = message[first_quote +
                      1:second_quote].replace('.', '').replace('?', '').replace(',', '').replace('-', '').replace('_', '')
 
+    # get the seed
     try:
         seeds = message[message.index('[')+1:len(message)-1]
         seeds = [int(seed.strip()) for seed in seeds.split(',')]
