@@ -28,5 +28,9 @@ To run the streamlit image viewer, run the command:
 streamlit run streamlit_viewer.py
 ```
 
+# Limitations and issues
+
+Your inbox only holds mentions for one week, which means that any images that you created more than 7 days ago will not be downloaded. If the script fails to download your images, it is most likely due to either a bad discord email/password (the ```Successfully logged in``` message always displays as long as the bot does not crash) or you have slow internet. If your internet is slow you can increase the page loading delays by increasing the time.sleep() in bot.py. I will hopefully be rolling out fixes for both of these issues in the next day or two.
+
 
 
