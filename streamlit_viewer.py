@@ -32,6 +32,8 @@ for prompt in prompts:
         is_col1 = True
         for dir, _, imgs in folder:
             for img in imgs:
+                if img == 'grid.png':
+                    continue
                 if is_col1:
                     col1.image(os.path.join(dir, img))
                     col1.write('Seed: {}'.format(img[:len(img)-4]))

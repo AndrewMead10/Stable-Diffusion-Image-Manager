@@ -26,6 +26,7 @@ password = args.password
 opts = Options()
 opts.headless = True
 opts.add_argument("--log-level=3")
+print('Downloading Chrome Driver')
 browser = webdriver.Chrome(ChromeDriverManager().install(), options=opts)
 browser.get('https://discord.com/login')
 email_element = browser.find_element_by_name('email')
