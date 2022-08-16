@@ -1,4 +1,6 @@
 import argparse
+import os
+import re
 import time
 
 from selenium import webdriver
@@ -6,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 from download_discord_file import download_discord_file
+from split_image import split_image
 
 
 parser = argparse.ArgumentParser(
@@ -24,6 +27,7 @@ password = args.password
 
 opts = Options()
 opts.headless = True
+opts.add_argument("--log-level=3")
 browser = webdriver.Chrome(ChromeDriverManager().install(), options=opts)
 browser.get('https://discord.com/login')
 email_element = browser.find_element_by_name('email')
@@ -83,16 +87,33 @@ for mention in mentions_list:
     prompt = message[first_quote +
                      1:second_quote].replace('.', '').replace('?', '').replace(',', '').replace('-', '').replace('_', '')
 
-    try:
-        seeds = message[message.index('[')+1:len(message)-1]
-        seeds = [int(seed.strip()) for seed in seeds.split(',')]
-    except:
-        seeds = [message[message.index('-S')+2:len(message)]]
+
 
     images = mention.find_elements_by_class_name('originalLink-Azwuo9')
     print(f'Downloading {prompt}')
-    for i, image in enumerate(images):
-        download_discord_file(image.get_attribute('href'), prompt, seeds[i])
+    if message.find('-g') == -1:
+        try:
+            seeds = message[message.index('[')+1:len(message)-1]
+            seeds = [int(seed.strip()) for seed in seeds.split(',')]
+        except:
+            seeds = [message[message.index('-S')+2:len(message)]]
+        for i, image in enumerate(images):
+            download_discord_file(image.get_attribute('href'), prompt, seeds[i])
+    else:
+        print(message)
+        seeds = [message[match.start() + 3: match.end()] for match in re.finditer("-S [0-9]*", message)]
+        seeds = seeds[1:]
+        try:
+            n = int(message[message.find('-n') + 3])
+        except:
+            n = 1
+        print(seeds)
+        print(n)
+        assert len(seeds) == n
 
+        download_discord_file(images[0].get_attribute('href'), prompt, 'grid')
+        split_image(os.path.join('images',prompt.strip(), 'grid.png'), n, seeds)
 
 print('Downloads sucessfuly finished')
+
+browser.quit()
