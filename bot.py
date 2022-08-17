@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import sys
 import time
 
 from selenium import webdriver
@@ -17,6 +18,8 @@ parser.add_argument('-E', '--email', type=str, required=True,
                     help='Email Associated With Your Discord Account')
 parser.add_argument('-P', '--password', type=str,
                     required=True, help='Your Discord Password')
+parser.add_argument('-C', '--captcha', type=bool, nargs='?', default=True, const=False,
+                    required=False, help='Use if there is a captcha detected during login')
 args = parser.parse_args()
 
 
@@ -24,9 +27,10 @@ email = args.email
 password = args.password
 
 opts = Options()
-opts.headless = True
+opts.headless = args.captcha
 opts.add_argument("--log-level=3")
-print('Downloading Chrome Driver')
+print('Loading Chrome Driver')
+print('')
 browser = webdriver.Chrome(ChromeDriverManager().install(), options=opts)
 browser.get('https://discord.com/login')
 email_element = browser.find_element_by_name('email')
@@ -38,10 +42,41 @@ password_element.send_keys(password)
 
 password_element.submit()
 
+time.sleep(2)
+should_exit = False
+
+if args.captcha:
+    try:
+        captcha = browser.find_element_by_xpath("//iframe[@title='widget containing checkbox for hCaptcha security challenge']")
+        print('Captcha Found, rerun using the --captcha flag to solve and continue')
+        browser.quit()
+        should_exit = True
+    except:
+        pass
+
+if not args.captcha:
+    print('Solve captcha in browser')
+    input('Press Enter once submitted')
+
+if should_exit:
+    sys.exit()
+
+# check if login was not valid
+try:
+    erorr = browser.find_element_by_class_name('errorMessage-1kMqS5')
+    print(erorr.text[1:])
+    browser.quit()
+    should_exit = True
+except:
+    pass
+
+if should_exit:
+    sys.exit()
+
 print('Successfully logged in')
 
 # wait for discord profile to load
-time.sleep(10)
+time.sleep(8)
 
 actions = ActionChains(browser)
 
@@ -93,7 +128,7 @@ for mention in mentions_list:
     first_quote = message.index('"')
     second_quote = message.index('"', first_quote + 1)
     prompt = message[first_quote +
-                     1:second_quote].replace('.', '').replace('?', '').replace(',', '').replace('-', '').replace('_', '')
+                    1:second_quote].replace('.', '').replace('?', '').replace(',', '').replace('-', '').replace('_', '')
 
     images = mention.find_elements_by_class_name('originalLink-Azwuo9')
     print(f'Downloading {prompt}')
@@ -108,7 +143,7 @@ for mention in mentions_list:
                 image.get_attribute('href'), prompt, seeds[i])
     else:
         seeds = [message[match.start() + 3: match.end()]
-                 for match in re.finditer("-S [0-9]*", message)]
+                for match in re.finditer("-S [0-9]*", message)]
         seeds = seeds[1:]
         try:
             n = int(message[message.find('-n') + 3])
