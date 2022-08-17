@@ -23,7 +23,7 @@ parser.add_argument('-C', '--captcha', action='store_const', default=True, const
 parser.add_argument('-D', '--delay', type=int, required=False, default=0,
                     help='Increase the amount of time (in seconds) the program waits to load each page')
 parser.add_argument('--show_browser', action='store_const', default=False, const=True,
-                    required=False, help='Show the browser window duriong execution')
+                    required=False, help='Show the browser window during execution')
 args = parser.parse_args()
 
 
