@@ -1,2 +1,3 @@
-images/*.png
+*.png
+previous.txt
 __pycache__
