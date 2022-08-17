@@ -18,16 +18,21 @@ parser.add_argument('-E', '--email', type=str, required=True,
                     help='Email Associated With Your Discord Account')
 parser.add_argument('-P', '--password', type=str,
                     required=True, help='Your Discord Password')
-parser.add_argument('-C', '--captcha', type=bool, nargs='?', default=True, const=False,
+parser.add_argument('-C', '--captcha', action='store_const', default=True, const=False,
                     required=False, help='Use if there is a captcha detected during login')
+parser.add_argument('-D', '--delay', type=int, required=False, default=0,
+                    help='Increase the amount of time (in seconds) the program waits to load each page')
+parser.add_argument('--show_browser', action='store_const', default=False, const=True,
+                    required=False, help='Show the browser window duriong execution')
 args = parser.parse_args()
 
 
 email = args.email
 password = args.password
+delay = args.delay
 
 opts = Options()
-opts.headless = args.captcha
+opts.headless = args.captcha and not args.show_browser
 opts.add_argument("--log-level=3")
 print('Loading Chrome Driver')
 print('')
@@ -42,7 +47,7 @@ password_element.send_keys(password)
 
 password_element.submit()
 
-time.sleep(2)
+time.sleep(2+delay)
 should_exit = False
 
 if args.captcha:
@@ -76,7 +81,7 @@ if should_exit:
 print('Successfully logged in')
 
 # wait for discord profile to load
-time.sleep(8)
+time.sleep(8+delay)
 
 actions = ActionChains(browser)
 
@@ -89,14 +94,14 @@ actions.move_to_element(inbox
                         ).click().perform()
 
 # wait for inbox to load
-time.sleep(2)
+time.sleep(2+delay)
 
 # load all messages in inbox
 while True:
     try:
         load_more = browser.find_element_by_class_name('lookFilled-yCfaCM')
         load_more.click()
-        time.sleep(2)
+        time.sleep(2+delay)
     except:
         break
 
