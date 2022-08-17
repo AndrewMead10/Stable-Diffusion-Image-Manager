@@ -1,2 +1,2 @@
-*.png
+images/*.png
 __pycache__
