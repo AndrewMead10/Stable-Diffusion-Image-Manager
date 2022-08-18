@@ -28,6 +28,8 @@ Once the previous command has finished executing, you can view all of your image
 streamlit run streamlit_viewer.py
 ```
 
+![streamlit image viewer](/demo/streamlit.PNG)
+
 # Captcha
 
 If there is a captcha detected, the bot will let you know. You can then rerun the command using the ```--captcha``` flag to solve the captcha yourself and then press enter in your terminal and then the bot will continue to work. Note that this will increase the loading times of pages, so you may need to increase the delay to compensate for this. *Note that you have to solve the captcha yourself, the bot cannot do it for you.*
